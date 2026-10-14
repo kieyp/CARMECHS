@@ -1,0 +1,1113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Find a mechanic near you on Kenyan roads.">
+<meta name="theme-color" content="#1c2321">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Fundi Karibu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: phone-first single column. Hazard-tape band on top, sticky tab bar, then one task per tab: find help, open requests, mechanic listing. */
+:root {
+  --bg: #f1f2f0;
+  --surface: #ffffff;
+  --sunken: #e6e8e5;
+  --ink: #1c2321;
+  --ink-2: #4c5652;
+  --ink-3: #7d8783;
+  --line: #d6dad7;
+  --accent: #e2580b;
+  --accent-ink: #ffffff;
+  --accent-soft: #fde6d6;
+  --hazard: #f5b700;
+  --good: #1d7a43;
+  --good-soft: #d9f0e1;
+  --warn: #8f5d00;
+  --warn-soft: #fbedc6;
+  --bad: #b3261e;
+  --bad-soft: #f9dedb;
+  --display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111514; --surface: #1a201e; --sunken: #232a28; --ink: #ecefed; --ink-2: #aeb8b4; --ink-3: #7f8a86; --line: #2f3734;
+    --accent: #ff7a2e; --accent-ink: #1d0b00; --accent-soft: #3a2111; --hazard: #f5b700;
+    --good: #5ccf8a; --good-soft: #15321f; --warn: #e8b64f; --warn-soft: #382a0e; --bad: #f08b83; --bad-soft: #3b1a17;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111514; --surface: #1a201e; --sunken: #232a28; --ink: #ecefed; --ink-2: #aeb8b4; --ink-3: #7f8a86; --line: #2f3734;
+  --accent: #ff7a2e; --accent-ink: #1d0b00; --accent-soft: #3a2111; --hazard: #f5b700;
+  --good: #5ccf8a; --good-soft: #15321f; --warn: #e8b64f; --warn-soft: #382a0e; --bad: #f08b83; --bad-soft: #3b1a17;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.45; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.tape { height: 10px; background: repeating-linear-gradient(-45deg, var(--hazard) 0 14px, #1c2321 14px 28px); }
+.hero { background: var(--ink); color: var(--bg); }
+.hero .wrap { padding-block: 18px 20px; display: flex; flex-direction: column; gap: 4px; }
+.hero h1 { font-family: var(--display); font-weight: 800; font-size: 34px; line-height: 1; margin: 0; letter-spacing: 0.01em; text-transform: uppercase; }
+.hero h1 span { color: var(--hazard); }
+.hero p { margin: 0; opacity: 0.8; max-width: 52ch; }
+
+.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.tabs .wrap { display: flex; gap: 4px; overflow-x: auto; }
+.tabs button { border: 0; background: none; padding: 12px 12px 10px; font-weight: 600; color: var(--ink-3); border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.badge { background: var(--accent); color: var(--accent-ink); font-size: 11px; font-weight: 700; border-radius: 99px; padding: 1px 7px; }
+
+main.wrap { padding-block: 18px 40px; display: flex; flex-direction: column; gap: 16px; }
+.section-title { font-family: var(--display); font-weight: 700; font-size: 22px; margin: 0; text-transform: uppercase; letter-spacing: 0.02em; text-wrap: balance; }
+.hint { font-size: 13px; color: var(--ink-3); margin: 0; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field > label, .lbl { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-2); }
+.field input, .field select, .field textarea { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 10px 12px; min-width: 0; width: 100%; }
+.field textarea { min-height: 70px; resize: vertical; }
+.row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 520px) { .row2 { grid-template-columns: minmax(0, 1fr); } }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 7px 13px; cursor: pointer; font-weight: 500; font-size: 14px; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.checks { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.check { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 10px 16px; border-radius: var(--r); cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; white-space: nowrap; }
+.btn:hover { border-color: var(--ink-3); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.dark { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.btn.wa { background: #1f9d55; border-color: #1f9d55; color: #fff; }
+.btn.small { padding: 6px 11px; font-size: 13px; }
+.btn.danger { color: var(--bad); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.results-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.list { display: flex; flex-direction: column; gap: 10px; }
+.mech { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 14px; }
+.mech h3 { margin: 0; font-family: var(--display); font-size: 21px; font-weight: 700; line-height: 1.1; }
+.mech .where { font-size: 13px; color: var(--ink-2); }
+.dist { text-align: right; }
+.dist .km { font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; }
+.dist .u { font-size: 12px; color: var(--ink-3); }
+.mech .tags { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 12px; background: var(--sunken); color: var(--ink-2); border-radius: 4px; padding: 2px 8px; }
+.tag.match { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.mech .contact { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.phone { font-weight: 700; font-variant-numeric: tabular-nums; user-select: all; letter-spacing: 0.02em; }
+.pill { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 99px; white-space: nowrap; display: inline-block; }
+.pill.good { background: var(--good-soft); color: var(--good); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.none { background: var(--sunken); color: var(--ink-3); }
+.status-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
+
+.req { background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--accent); border-radius: var(--r); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.req.accepted { border-left-color: var(--good); }
+.req.done { border-left-color: var(--line); opacity: 0.8; }
+.req-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+.req h3 { margin: 0; font-family: var(--display); font-size: 20px; font-weight: 700; }
+.req .meta { font-size: 13px; color: var(--ink-2); }
+.req .note { font-size: 14px; background: var(--sunken); padding: 8px 10px; border-radius: 6px; overflow-wrap: anywhere; }
+
+.mine { background: var(--ink); color: var(--bg); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.mine h2 { margin: 0; font-family: var(--display); font-size: 22px; text-transform: uppercase; }
+.mine .meta { opacity: 0.8; font-size: 14px; }
+.mine .btn { background: transparent; color: var(--bg); border-color: color-mix(in srgb, var(--bg) 40%, transparent); }
+.mine .btn.wa { background: #1f9d55; border-color: #1f9d55; color: #fff; }
+
+.avail { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border-radius: var(--r); border: 2px solid var(--line); background: var(--surface); }
+.avail.on { border-color: var(--good); background: var(--good-soft); }
+.avail strong { font-family: var(--display); font-size: 22px; text-transform: uppercase; display: block; line-height: 1.1; }
+
+.empty { text-align: center; padding: 30px 16px; color: var(--ink-2); display: flex; flex-direction: column; gap: 10px; align-items: center; background: var(--surface); border: 1px dashed var(--line); border-radius: var(--r); }
+.empty h3 { margin: 0; font-family: var(--display); font-size: 22px; color: var(--ink); text-transform: uppercase; }
+.empty p { margin: 0; max-width: 46ch; }
+.msg { font-size: 14px; padding: 10px 12px; border-radius: var(--r); }
+.msg.err { background: var(--bad-soft); color: var(--bad); }
+.msg.ok { background: var(--good-soft); color: var(--good); }
+.msg.info { background: var(--warn-soft); color: var(--warn); }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 11px 16px; border-radius: var(--r); font-size: 14px; z-index: 30; max-width: calc(100% - 32px); }
+footer.wrap { padding-block: 0 32px; font-size: 12px; color: var(--ink-3); }
+
+.demo-bar { background: var(--hazard); color: #1c2321; font-size: 13px; }
+.demo-bar .wrap { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-block: 8px; flex-wrap: wrap; }
+.demo-bar .btn { background: #fff; color: #1c2321; border-color: #1c2321; }
+
+/* Mechanics status board */
+.counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.count { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 12px 14px; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 2px; }
+.count[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.count .n { font-family: var(--display); font-weight: 800; font-size: 32px; line-height: 1; font-variant-numeric: tabular-nums; }
+.count .k { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+.dot.available { background: var(--good); box-shadow: 0 0 0 3px var(--good-soft); }
+.dot.busy { background: var(--warn); box-shadow: 0 0 0 3px var(--warn-soft); }
+.dot.offline { background: var(--ink-3); box-shadow: 0 0 0 3px var(--sunken); }
+.board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 600px) { .board { grid-template-columns: minmax(0, 1fr); } }
+.bcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.bcard.offline { opacity: 0.75; }
+.bcard-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.bcard h3 { margin: 0; font-family: var(--display); font-size: 19px; font-weight: 700; line-height: 1.15; }
+.bcard .meta { font-size: 13px; color: var(--ink-2); }
+.seg3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; }
+.seg3 button { border: 2px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 12px 8px; cursor: pointer; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.seg3 button[aria-pressed="true"].available { border-color: var(--good); background: var(--good-soft); color: var(--good); }
+.seg3 button[aria-pressed="true"].busy { border-color: var(--warn); background: var(--warn-soft); color: var(--warn); }
+.seg3 button[aria-pressed="true"].offline { border-color: var(--ink-3); background: var(--sunken); }
+
+/* Fee card */
+.fee { border-radius: var(--r); border: 2px solid var(--hazard); background: var(--surface); overflow: hidden; }
+.fee-top { background: var(--ink); color: var(--bg); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.fee-top .lbl { color: var(--hazard); }
+.fee-amt { font-family: var(--display); font-weight: 800; font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; }
+.fee-amt small { font-size: 16px; font-weight: 700; margin-right: 4px; }
+.fee-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.fee-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.fee-steps b { font-variant-numeric: tabular-nums; }
+.till { display: inline-flex; align-items: center; gap: 8px; background: var(--sunken); border-radius: 6px; padding: 4px 4px 4px 10px; font-weight: 700; font-size: 18px; letter-spacing: 0.04em; user-select: all; }
+.code-input { text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; }
+
+/* Chat */
+.chat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: flex; flex-direction: column; min-height: 420px; }
+.chat-log { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-height: 62vh; }
+.bubble { max-width: 88%; padding: 10px 14px; border-radius: 14px; overflow-wrap: anywhere; display: flex; flex-direction: column; gap: 6px; }
+.bubble p, .bubble ul { margin: 0; }
+.bubble ul { padding-left: 18px; }
+.bubble.user { align-self: flex-end; background: var(--ink); color: var(--bg); border-bottom-right-radius: 4px; }
+.bubble.ai { align-self: flex-start; background: var(--sunken); border-bottom-left-radius: 4px; }
+.bubble.ai .who { font-family: var(--display); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }
+.bubble .tool-note { font-size: 12px; color: var(--ink-3); font-style: italic; }
+.chat-form { border-top: 1px solid var(--line); padding: 12px; display: flex; gap: 8px; align-items: flex-end; }
+.chat-form textarea { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; resize: none; min-height: 44px; max-height: 140px; background: var(--surface); }
+.suggest { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 16px 12px; }
+.dots::after { content: "Thinking"; animation: dots 1.2s steps(4) infinite; }
+@keyframes dots { 0% { content: "Thinking"; } 25% { content: "Thinking."; } 50% { content: "Thinking.."; } 75% { content: "Thinking..."; } }
+@media (prefers-reduced-motion: reduce) { .dots::after { animation: none; content: "Thinking..."; } }
+</style>
+</head>
+<body>
+
+<div class="tape" aria-hidden="true"></div>
+<header class="hero">
+  <div class="wrap">
+    <h1>Fundi <span>Karibu</span></h1>
+    <p>Broken down on the road? Find a mechanic near you in Kenya and reach them by phone or WhatsApp.</p>
+  </div>
+</header>
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap" role="tablist">
+    <button role="tab" id="tab-find" aria-selected="true" type="button">Find a fundi</button>
+    <button role="tab" id="tab-req" aria-selected="false" type="button">Help requests <span class="badge" id="reqBadge" hidden></span></button>
+    <button role="tab" id="tab-board" aria-selected="false" type="button">Mechanics <span class="badge" id="boardBadge" hidden style="background:var(--good);color:#fff"></span></button>
+    <button role="tab" id="tab-ai" aria-selected="false" type="button">Ask Fundi AI</button>
+    <button role="tab" id="tab-mech" aria-selected="false" type="button">I'm a mechanic</button>
+    <button role="tab" id="tab-admin" aria-selected="false" type="button" hidden>Admin</button>
+  </div>
+</nav>
+
+<main class="wrap">
+  <!-- FIND -->
+  <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" style="display:flex;flex-direction:column;gap:16px">
+    <div id="myRequest"></div>
+    <div class="box">
+      <div class="row2">
+        <div class="field">
+          <label for="place">Where are you?</label>
+          <select id="place"></select>
+        </div>
+        <div class="field">
+          <label for="landmark">Landmark or road (optional)</label>
+          <input id="landmark" placeholder="e.g. Shell petrol station, Mombasa Rd" maxlength="120">
+        </div>
+      </div>
+      <div class="field">
+        <span class="lbl">What's wrong?</span>
+        <div class="chips" id="problemChips"></div>
+      </div>
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="mobileOnly"> Comes to me</label>
+        <label class="check"><input type="checkbox" id="availOnly"> Available now</label>
+      </div>
+    </div>
+    <div class="results-head">
+      <h2 class="section-title" id="resultsTitle">Mechanics nearby</h2>
+      <button class="btn primary small" type="button" id="openRequest">Post a help request</button>
+    </div>
+    <p class="hint">Distances are approximate, measured between towns or areas. Call or message to confirm before you wait.</p>
+    <div class="list" id="results"></div>
+  </section>
+
+  <!-- POST REQUEST (inline form) -->
+  <section id="panel-post" hidden style="display:flex;flex-direction:column;gap:16px">
+    <h2 class="section-title">Post a help request</h2>
+    <p class="hint">Mechanics using Fundi Karibu see your request, and one of them can take it. You'll see who's coming here.</p>
+    <div id="feeCard"></div>
+    <div class="box">
+      <div class="row2">
+        <div class="field"><label for="rqPlace">Where are you?</label><select id="rqPlace"></select></div>
+        <div class="field"><label for="rqLandmark">Landmark or road</label><input id="rqLandmark" maxlength="120" placeholder="e.g. after Kenol junction, heading Nyeri"></div>
+        <div class="field"><label for="rqProblem">Problem</label><select id="rqProblem"></select></div>
+        <div class="field"><label for="rqCar">Vehicle</label><input id="rqCar" maxlength="60" placeholder="e.g. Toyota Probox, white, KDA 123X"></div>
+        <div class="field"><label for="rqPhone">Your phone number</label><input id="rqPhone" inputmode="tel" maxlength="20" placeholder="07xx xxx xxx"></div>
+      </div>
+      <div class="field"><label for="rqNote">Anything else the mechanic should know?</label><textarea id="rqNote" maxlength="400" placeholder="e.g. Engine cut off, smells of burning, car is on the shoulder"></textarea></div>
+      <div id="rqMsg"></div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="rqSend">Send request</button>
+        <button class="btn" type="button" id="rqCancel">Cancel</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- REQUESTS -->
+  <section id="panel-req" role="tabpanel" aria-labelledby="tab-req" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div>
+      <h2 class="section-title">Drivers needing help</h2>
+      <p class="hint" id="reqHint">Open requests from the last 24 hours, nearest to your garage first.</p>
+    </div>
+    <div class="list" id="reqList"></div>
+  </section>
+
+  <!-- BOARD -->
+  <section id="panel-board" role="tabpanel" aria-labelledby="tab-board" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div>
+      <h2 class="section-title">Who's working now</h2>
+      <p class="hint" id="boardHint">Every listed mechanic and their live status. Statuses older than 12 hours count as offline.</p>
+    </div>
+    <div class="counts" id="counts"></div>
+    <div class="board" id="board"></div>
+  </section>
+
+  <!-- AI -->
+  <section id="panel-ai" role="tabpanel" aria-labelledby="tab-ai" hidden style="display:flex;flex-direction:column;gap:12px">
+    <div>
+      <h2 class="section-title">Ask Fundi AI</h2>
+      <p class="hint">Describe what your car is doing. Fundi AI helps you stay safe, work out what might be wrong, and find a mechanic. It gives general guidance, not a mechanic's inspection.</p>
+    </div>
+    <div class="chat">
+      <div class="chat-log" id="chatLog" aria-live="polite"></div>
+      <div class="suggest" id="suggest"></div>
+      <form class="chat-form" id="chatForm">
+        <label for="chatInput" class="lbl" style="position:absolute;left:-9999px">Message</label>
+        <textarea id="chatInput" rows="1" maxlength="1500" placeholder="e.g. Car died on Thika Road, clicking sound when I turn the key"></textarea>
+        <button class="btn primary" type="submit" id="chatSend">Send</button>
+        <button class="btn" type="button" id="chatStop" hidden>Stop</button>
+      </form>
+    </div>
+    <div class="actions"><button class="btn small" type="button" id="chatClear">Start a new chat</button></div>
+  </section>
+
+  <!-- ADMIN -->
+  <section id="panel-admin" role="tabpanel" aria-labelledby="tab-admin" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div>
+      <h2 class="section-title">Consultation fee</h2>
+      <p class="hint">Drivers see this card before they post a help request. Only you and editors can change it.</p>
+    </div>
+    <div class="box">
+      <label class="check"><input type="checkbox" id="aOn"> Charge a consultation fee before a request is posted</label>
+      <div class="row2">
+        <div class="field"><label for="aAmount">Fee (KES)</label><input id="aAmount" type="number" min="1" step="1" inputmode="numeric" placeholder="e.g. 300"></div>
+        <div class="field"><label for="aMethod">M-Pesa payment type</label><select id="aMethod"><option value="till">Buy Goods (Till number)</option><option value="paybill">Paybill</option></select></div>
+        <div class="field"><label for="aNumber" id="aNumberLbl">Till number</label><input id="aNumber" inputmode="numeric" maxlength="10" placeholder="e.g. 123456"></div>
+        <div class="field" id="aAccountWrap"><label for="aAccount">Account number drivers enter</label><input id="aAccount" maxlength="20" placeholder="e.g. FUNDI"></div>
+        <div class="field"><label for="aName">Name shown on M-Pesa</label><input id="aName" maxlength="50" placeholder="e.g. FUNDI KARIBU LTD"></div>
+      </div>
+      <div class="field"><label for="aCovers">What the fee covers</label><input id="aCovers" maxlength="160" placeholder="e.g. The mechanic's call-out and diagnosis. Repairs and parts are agreed with the mechanic."></div>
+      <div id="aMsg"></div>
+      <div class="actions"><button class="btn primary" type="button" id="aSave">Save fee settings</button></div>
+    </div>
+    <div>
+      <h2 class="section-title">Payments to check</h2>
+      <p class="hint">Match each M-Pesa code against your M-Pesa statement, then mark it. Mechanics see whether a fee is confirmed.</p>
+    </div>
+    <div class="list" id="payList"></div>
+  </section>
+
+  <!-- MECHANIC -->
+  <section id="panel-mech" role="tabpanel" aria-labelledby="tab-mech" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div id="availBox"></div>
+    <div>
+      <h2 class="section-title" id="mechTitle">List your garage</h2>
+      <p class="hint">Drivers nearby will see your business, services and phone number.</p>
+    </div>
+    <div class="box">
+      <div class="row2">
+        <div class="field"><label for="mName">Business name</label><input id="mName" maxlength="60" placeholder="e.g. Mwangi Auto Garage"></div>
+        <div class="field"><label for="mContact">Contact person</label><input id="mContact" maxlength="40" placeholder="e.g. Peter Mwangi"></div>
+        <div class="field"><label for="mPhone">Phone number</label><input id="mPhone" inputmode="tel" maxlength="20" placeholder="07xx xxx xxx"></div>
+        <div class="field"><label for="mPlace">Where is your garage?</label><select id="mPlace"></select></div>
+      </div>
+      <div class="field"><label for="mLandmark">Directions or landmark</label><input id="mLandmark" maxlength="120" placeholder="e.g. Behind Total, Thika Rd service lane"></div>
+      <div class="field"><span class="lbl">Services</span><div class="chips" id="mServices"></div></div>
+      <div class="field"><span class="lbl">Vehicles you work on</span><div class="chips" id="mVehicles"></div></div>
+      <div class="row2">
+        <div class="field"><label for="mHours">Working hours</label>
+          <select id="mHours"><option value="24/7">24 hours, 7 days</option><option value="day">Daytime (about 7am to 7pm)</option><option value="day-mon-sat">Daytime, Monday to Saturday</option></select></div>
+        <div class="field"><label for="mRange">Do you come to the driver?</label>
+          <select id="mRange"><option value="0">No, drivers come to the garage</option><option value="10">Yes, up to 10 km</option><option value="25">Yes, up to 25 km</option><option value="50">Yes, up to 50 km</option><option value="100">Yes, up to 100 km</option></select></div>
+      </div>
+      <label class="check"><input type="checkbox" id="mWa" checked> This number is on WhatsApp</label>
+      <div id="mMsg"></div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="mSave">Save listing</button>
+        <span id="mDelWrap"></span>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="wrap">In an emergency or an accident with injuries, call 999 or 112 first.</footer>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  // Approximate centre points for Nairobi areas and towns on Kenya's main roads.
+  const PLACES = [
+    ["Nairobi", [["nbi-cbd","Nairobi CBD",-1.2864,36.8172],["westlands","Westlands",-1.2676,36.8108],["kilimani","Kilimani / Yaya",-1.2900,36.7850],["karen","Karen",-1.3197,36.7073],["langata","Lang'ata",-1.3600,36.7500],["industrial","Industrial Area",-1.3050,36.8500],["eastleigh","Eastleigh",-1.2750,36.8500],["embakasi","Embakasi / Pipeline",-1.3200,36.9000],["jkia","JKIA / Mombasa Rd",-1.3192,36.9278],["kasarani","Kasarani",-1.2200,36.9000],["roysambu","Roysambu / TRM",-1.2180,36.8870],["ruaka","Ruaka",-1.2050,36.7800],["rongai","Rongai",-1.3960,36.7440],["ngong","Ngong",-1.3530,36.6680]]],
+    ["Around Nairobi", [["kiambu","Kiambu",-1.1714,36.8356],["ruiru","Ruiru",-1.1460,36.9600],["juja","Juja",-1.1000,37.0130],["thika","Thika",-1.0333,37.0693],["kikuyu","Kikuyu",-1.2460,36.6630],["limuru","Limuru",-1.1140,36.6420],["syokimau","Syokimau",-1.3600,36.9400],["athi","Athi River / Mlolongo",-1.4560,36.9780],["kitengela","Kitengela",-1.4730,36.9600],["machakos","Machakos",-1.5177,37.2634],["kajiado","Kajiado",-1.8500,36.7833]]],
+    ["Mombasa Road (A109)", [["sultan","Sultan Hamud",-2.0200,37.3800],["emali","Emali",-2.0833,37.4667],["kibwezi","Kibwezi",-2.4167,37.9667],["mtito","Mtito Andei",-2.6900,38.1670],["voi","Voi",-3.3961,38.5561],["mariakani","Mariakani",-3.8667,39.4667],["mombasa","Mombasa",-4.0435,39.6682],["diani","Diani / Ukunda",-4.3167,39.5667],["kilifi","Kilifi",-3.6305,39.8499],["malindi","Malindi",-3.2192,40.1169]]],
+    ["Nakuru – Eldoret – Western (A104)", [["maimahiu","Mai Mahiu",-1.0167,36.5833],["naivasha","Naivasha",-0.7167,36.4333],["gilgil","Gilgil",-0.4930,36.3170],["nakuru","Nakuru",-0.3031,36.0800],["molo","Molo",-0.2500,35.7333],["eldoret","Eldoret",0.5143,35.2698],["kitale","Kitale",1.0157,35.0062],["kakamega","Kakamega",0.2827,34.7519],["bungoma","Bungoma",0.5635,34.5606],["malaba","Malaba",0.6333,34.2833],["busia","Busia",0.4608,34.1115]]],
+    ["Nyanza & South Rift", [["narok","Narok",-1.0833,35.8667],["kericho","Kericho",-0.3677,35.2831],["kisumu","Kisumu",-0.0917,34.7680],["kisii","Kisii",-0.6817,34.7667],["migori","Migori",-1.0634,34.4731]]],
+    ["Mt Kenya & North", [["muranga","Murang'a",-0.7210,37.1526],["nyeri","Nyeri",-0.4201,36.9476],["karatina","Karatina",-0.4833,37.1333],["embu","Embu",-0.5310,37.4570],["meru","Meru",0.0470,37.6490],["nanyuki","Nanyuki",0.0167,37.0667],["nyahururu","Nyahururu",0.0333,36.3667],["isiolo","Isiolo",0.3546,37.5822]]],
+    ["Eastern & North Eastern", [["kitui","Kitui",-1.3667,38.0167],["garissa","Garissa",-0.4532,39.6461],["namanga","Namanga",-2.5500,36.7833],["lodwar","Lodwar",3.1191,35.5973]]]
+  ];
+  const PLACE = {};
+  for (const [, list] of PLACES) for (const [id, name, lat, lng] of list) PLACE[id] = { id, name, lat, lng };
+
+  const SERVICES = [
+    ["engine", "Engine & won't start"], ["tyres", "Tyres & punctures"], ["battery", "Battery & jump start"], ["overheat", "Overheating & radiator"],
+    ["brakes", "Brakes"], ["electrical", "Electrical & lights"], ["towing", "Towing"], ["fuel", "Fuel delivery"], ["lockout", "Locked out / keys"], ["body", "Accident & body work"]
+  ];
+  const SNAME = Object.fromEntries(SERVICES);
+  const PROBLEMS = [
+    ["start", "Won't start", "engine"], ["tyre", "Flat tyre", "tyres"], ["battery", "Dead battery", "battery"], ["overheat", "Overheating", "overheat"],
+    ["brakes", "Brakes", "brakes"], ["electrical", "Electrical", "electrical"], ["fuel", "Out of fuel", "fuel"], ["tow", "Need a tow", "towing"],
+    ["lockout", "Locked out", "lockout"], ["accident", "Accident damage", "body"], ["other", "Something else", null]
+  ];
+  const PROB = Object.fromEntries(PROBLEMS.map(p => [p[0], { label: p[1], service: p[2] }]));
+  const VEHICLES = [["car", "Cars & SUVs"], ["matatu", "Matatus & buses"], ["truck", "Trucks & lorries"], ["moto", "Motorbikes & tuk-tuks"]];
+  const HOURS = { "24/7": "Open 24/7", "day": "Daytime", "day-mon-sat": "Daytime, Mon–Sat" };
+  const AVAIL_MS = 12 * 3600 * 1000;
+  const REQ_MS = 24 * 3600 * 1000;
+
+  const $ = id => document.getElementById(id);
+  const el = (tag, attrs, ...kids) => {
+    const n = document.createElement(tag);
+    if (attrs) for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === "class") n.className = v;
+      else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v === true ? "" : v);
+    }
+    for (const k of kids.flat()) if (k != null && k !== false) n.append(k.nodeType ? k : document.createTextNode(String(k)));
+    return n;
+  };
+  function toast(t) { const n = $("toast"); n.textContent = t; n.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => n.hidden = true, 3500); }
+  function km(a, b) {
+    if (!a || !b) return null;
+    const R = 6371, r = x => x * Math.PI / 180;
+    const dLat = r(b.lat - a.lat), dLng = r(b.lng - a.lng);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  const fmtKm = d => d == null ? "?" : d < 1 ? "<1" : d < 20 ? d.toFixed(0) : String(Math.round(d / 5) * 5);
+  // Kenyan numbers: 07xx / 01xx / +254 / 254 -> 2547xxxxxxxx
+  function normPhone(s) {
+    let d = String(s || "").replace(/\D/g, "");
+    if (d.startsWith("254")) d = d; else if (d.startsWith("0") && d.length === 10) d = "254" + d.slice(1); else if (d.length === 9 && /^[17]/.test(d)) d = "254" + d;
+    return /^254[17]\d{8}$/.test(d) ? d : null;
+  }
+  const showPhone = d => d ? "+254 " + d.slice(3, 6) + " " + d.slice(6, 9) + " " + d.slice(9) : "";
+  function ago(t) {
+    const m = Math.round((Date.now() - t) / 60000);
+    if (m < 1) return "just now"; if (m < 60) return m + " min ago";
+    const h = Math.round(m / 60); if (h < 24) return h + " h ago";
+    return Math.round(h / 24) + " d ago";
+  }
+  function placeSelect(sel, placeholder) {
+    sel.replaceChildren(el("option", { value: "" }, placeholder));
+    for (const [group, list] of PLACES) sel.append(el("optgroup", { label: group }, list.map(([id, name]) => el("option", { value: id }, name))));
+  }
+  function copyBtn(text) {
+    return el("button", { class: "btn small", type: "button", onclick: async e => {
+      try { await navigator.clipboard.writeText(text); toast("Number copied"); }
+      catch (_) { const r = document.createRange(); const p = e.target.parentElement.querySelector(".phone"); if (p) { r.selectNodeContents(p); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } toast("Number selected. Copy it from here."); }
+    } }, "Copy");
+  }
+  function contactRow(phone, waText, isWa) {
+    if (!phone) return el("div", { class: "contact" }, el("span", { class: "hint" }, "No phone number listed"));
+    if (DEMO) return el("div", { class: "contact" }, el("span", { class: "phone" }, "+254 7•• ••• •••"),
+      el("button", { class: "btn dark small", type: "button", onclick: () => toast("Demo only. Calling is switched off.") }, "Call"),
+      isWa !== false ? el("button", { class: "btn wa small", type: "button", onclick: () => toast("Demo only. WhatsApp is switched off.") }, "WhatsApp") : null);
+    return el("div", { class: "contact" },
+      el("span", { class: "phone" }, showPhone(phone)),
+      el("a", { class: "btn dark small", href: "tel:+" + phone }, "Call"),
+      isWa !== false ? el("a", { class: "btn wa small", href: "https://wa.me/" + phone + (waText ? "?text=" + encodeURIComponent(waText) : ""), target: "_blank", rel: "noopener" }, "WhatsApp") : null,
+      copyBtn("+" + phone));
+  }
+
+  const state = { tab: "find", place: "", landmark: "", problem: null, mobileOnly: false, availOnly: false,
+    mechanics: [], requests: [], mechLoaded: false, reqLoaded: false, me: null, canWrite: null, canEdit: false, dbOk: null, mServices: new Set(), mVehicles: new Set(["car"]),
+    fee: null, feeLoaded: false };
+  let db = null, user = null, sample = null;
+  let DEMO = false;
+  const feeActive = () => !!(state.fee && state.fee.on && state.fee.amount > 0 && state.fee.number);
+  const fmtKes = n => "KES " + Number(n || 0).toLocaleString("en-KE");
+  const normCode = s => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  function feePill(r) {
+    if (!r.fee) return null;
+    const s = r.fee.status;
+    return el("span", { class: "pill " + (s === "verified" ? "good" : s === "rejected" ? "bad" : "warn") },
+      (s === "verified" ? "Fee confirmed" : s === "rejected" ? "Fee not found" : "Fee being checked") + " · " + fmtKes(r.fee.amount));
+  }
+  try { const s = JSON.parse(localStorage.getItem("fk-prefs") || "{}"); if (s.place && PLACE[s.place]) state.place = s.place; } catch (_) {}
+  const savePrefs = () => { try { localStorage.setItem("fk-prefs", JSON.stringify({ place: state.place })); } catch (_) {} };
+
+  // ---------- Tabs ----------
+  function setTab(t) {
+    state.tab = t;
+    for (const k of TABS) { $("tab-" + k).setAttribute("aria-selected", String(k === t)); $("panel-" + k).hidden = t !== k; }
+    $("panel-post").hidden = t !== "post";
+    render();
+  }
+  const TABS = ["find", "req", "board", "ai", "mech", "admin"];
+  for (const k of TABS) $("tab-" + k).onclick = () => setTab(k);
+
+  // ---------- Find ----------
+  placeSelect($("place"), "Choose the nearest town or area");
+  $("place").value = state.place;
+  $("place").onchange = e => { state.place = e.target.value; savePrefs(); render(); };
+  $("landmark").oninput = e => { state.landmark = e.target.value; };
+  $("mobileOnly").onchange = e => { state.mobileOnly = e.target.checked; render(); };
+  $("availOnly").onchange = e => { state.availOnly = e.target.checked; render(); };
+  function renderProblemChips() {
+    $("problemChips").replaceChildren(...PROBLEMS.map(([k, label]) => el("button", { class: "chip", type: "button", "aria-pressed": String(state.problem === k),
+      onclick: () => { state.problem = state.problem === k ? null : k; render(); } }, label)));
+  }
+  // Live status: available / busy / offline. A status not refreshed in 12 hours counts as offline.
+  function statusOf(m) {
+    if (m.status && m.statusAt) return Date.now() - m.statusAt < AVAIL_MS ? m.status : "offline";
+    return m.available && m.availableAt && Date.now() - m.availableAt < AVAIL_MS ? "available" : "offline";
+  }
+  const isAvailable = m => statusOf(m) === "available";
+  const STATUS = { available: { label: "Available now", pill: "good" }, busy: { label: "Busy on a job", pill: "warn" }, offline: { label: "Offline", pill: "none" } };
+  const STATUS_RANK = { available: 0, busy: 1, offline: 2 };
+  const statusPill = m => { const s = statusOf(m); return el("span", { class: "pill " + STATUS[s].pill }, el("span", { class: "dot " + s, style: "width:7px;height:7px;box-shadow:none;margin-right:5px;vertical-align:1px" }), STATUS[s].label); };
+  async function setMyStatus(status, quiet) {
+    if (!db || !state.me || !myListing()) return;
+    const now = Date.now();
+    try {
+      await db.doc("mechanics/" + state.me).update({ status, statusAt: now, available: status === "available", availableAt: status === "available" ? now : null });
+      if (!quiet) toast(status === "available" ? "You're available. Drivers can see you for the next 12 hours." : status === "busy" ? "You're marked busy." : "You're offline.");
+    } catch (e) { if (!quiet) toast("Couldn't update your status. Try again."); }
+  }
+  let boardFilter = "all";
+  function renderBoard() {
+    const here = PLACE[state.place];
+    const all = state.mechanics.map(m => ({ m, s: statusOf(m), d: km(here, PLACE[m.place]) }));
+    const n = { available: 0, busy: 0, offline: 0 };
+    for (const x of all) n[x.s]++;
+    const badge = $("boardBadge"); badge.hidden = !n.available; badge.textContent = n.available;
+    if (state.tab !== "board") return;
+    $("boardHint").textContent = "Every listed mechanic and their live status" + (here ? ", nearest to " + here.name + " first" : "") + ". Statuses older than 12 hours count as offline.";
+    $("counts").replaceChildren(...["available", "busy", "offline"].map(s => el("button", { class: "count", type: "button", "aria-pressed": String(boardFilter === s),
+      onclick: () => { boardFilter = boardFilter === s ? "all" : s; renderBoard(); } },
+      el("span", { class: "n" }, n[s]), el("span", { class: "k" }, el("span", { class: "dot " + s }), s === "available" ? "Available" : s === "busy" ? "Busy" : "Offline"))));
+    if (!state.mechLoaded) { $("board").replaceChildren(el("div", { class: "empty", style: "grid-column:1/-1" }, el("p", null, "Loading mechanics…"))); return; }
+    let list = boardFilter === "all" ? all : all.filter(x => x.s === boardFilter);
+    list.sort((a, b) => STATUS_RANK[a.s] - STATUS_RANK[b.s] || ((a.d ?? 1e9) - (b.d ?? 1e9)) || String(a.m.name).localeCompare(String(b.m.name)));
+    if (!list.length) {
+      $("board").replaceChildren(el("div", { class: "empty", style: "grid-column:1/-1" },
+        el("h3", null, state.mechanics.length ? "Nobody here right now" : "No mechanics listed yet"),
+        el("p", null, state.mechanics.length ? "No mechanic has this status at the moment." : "Mechanics appear here once they list their garage."),
+        !state.mechanics.length ? el("button", { class: "btn primary", type: "button", onclick: () => setTab("mech") }, "List a garage") : null));
+      return;
+    }
+    $("board").replaceChildren(...list.map(({ m, s, d }) => {
+      const pl = PLACE[m.place];
+      const since = m.statusAt || m.availableAt;
+      return el("article", { class: "bcard " + s },
+        el("div", { class: "bcard-top" },
+          el("div", { style: "min-width:0" }, el("h3", null, m.name), el("div", { class: "meta" }, (pl ? pl.name : "") + (here && d != null ? " · " + (d < 1 ? "under 1" : "~" + fmtKm(d)) + " km" : ""))),
+          statusPill(m)),
+        el("div", { class: "meta" }, (m.services || []).slice(0, 4).map(x => SNAME[x] || x).join(" · ") + ((m.services || []).length > 4 ? " · +" + ((m.services || []).length - 4) : "")),
+        s !== "offline" && since ? el("div", { class: "meta" }, "Status set " + ago(since)) : null,
+        s === "offline" ? null : contactRow(m.phone, "Hello, I found you on Fundi Karibu. Are you free to help with my car?", m.whatsapp));
+    }));
+  }
+
+  function renderResults() {
+    const out = $("results");
+    const here = PLACE[state.place];
+    const need = state.problem && PROB[state.problem].service;
+    $("resultsTitle").textContent = here ? "Mechanics near " + here.name : "Mechanics nearby";
+    if (!state.mechLoaded) { out.replaceChildren(el("div", { class: "empty" }, el("p", null, state.dbOk === false ? "This page can't reach its mechanic list from here. Open it in Claude while signed in." : "Loading mechanics…"))); return; }
+    if (!state.mechanics.length) {
+      out.replaceChildren(el("div", { class: "empty" }, el("h3", null, "No mechanics listed yet"),
+        el("p", null, "Fundi Karibu fills up as garages and mobile mechanics add themselves. Know a good fundi? Ask them to list their garage, or list your own."),
+        el("button", { class: "btn primary", type: "button", onclick: () => setTab("mech") }, "List a garage")));
+      return;
+    }
+    let list = state.mechanics.map(m => ({ m, d: km(here, PLACE[m.place]) }));
+    if (need) list = list.filter(x => (x.m.services || []).includes(need));
+    if (state.mobileOnly) list = list.filter(x => x.m.range > 0 && (x.d == null || x.d <= x.m.range));
+    if (state.availOnly) list = list.filter(x => isAvailable(x.m));
+    list.sort((a, b) => ((a.d ?? 1e9) - (b.d ?? 1e9)) || (STATUS_RANK[statusOf(a.m)] - STATUS_RANK[statusOf(b.m)]));
+    if (!list.length) {
+      out.replaceChildren(el("div", { class: "empty" }, el("h3", null, "No match"),
+        el("p", null, "No listed mechanic matches these filters. Clear a filter, or post a help request so mechanics can come to you."),
+        el("button", { class: "btn primary", type: "button", onclick: openPost }, "Post a help request")));
+      return;
+    }
+    const waBase = () => {
+      const p = PLACE[state.place];
+      return "Hello, I found you on Fundi Karibu. I need help" + (state.problem ? ": " + PROB[state.problem].label.toLowerCase() : "") + "." + (p ? " I'm near " + p.name + (state.landmark ? ", " + state.landmark : "") + "." : "");
+    };
+    out.replaceChildren(...list.slice(0, 60).map(({ m, d }) => {
+      const pl = PLACE[m.place];
+      const avail = isAvailable(m);
+      const comes = m.range > 0 && (d == null || d <= m.range);
+      return el("article", { class: "mech" },
+        el("div", null,
+          el("h3", null, m.name || "Mechanic"),
+          el("div", { class: "where" }, (pl ? pl.name : "Location not set") + (m.landmark ? " · " + m.landmark : "")),
+          el("div", { class: "status-row" },
+            statusPill(m),
+            el("span", { class: "pill none" }, HOURS[m.hours] || "Hours not set"),
+            m.range > 0 ? el("span", { class: comes ? "pill warn" : "pill none" }, comes ? "Comes to you" : "Comes out up to " + m.range + " km") : null)),
+        here ? el("div", { class: "dist" }, el("div", { class: "km" }, fmtKm(d)), el("div", { class: "u" }, "km away")) : el("div"),
+        el("div", { class: "tags" }, (m.services || []).map(s => el("span", { class: "tag" + (s === need ? " match" : "") }, SNAME[s] || s)),
+          (m.vehicles || []).length ? el("span", { class: "tag" }, (m.vehicles || []).map(v => (VEHICLES.find(x => x[0] === v) || [, v])[1]).join(", ")) : null),
+        contactRow(m.phone, waBase(), m.whatsapp));
+    }));
+  }
+
+  // ---------- My request (driver) ----------
+  function myOpenRequest() {
+    if (!state.me) return null;
+    return state.requests.filter(r => r.driver === state.me && (r.status === "open" || r.status === "accepted") && Date.now() - r.createdAt < REQ_MS)
+      .sort((a, b) => b.createdAt - a.createdAt)[0] || null;
+  }
+  function renderMyRequest() {
+    const box = $("myRequest");
+    const r = myOpenRequest();
+    if (!r) { box.replaceChildren(); return; }
+    const mech = r.acceptedBy && state.mechanics.find(m => m.id === r.acceptedBy);
+    const pl = PLACE[r.place];
+    box.replaceChildren(el("div", { class: "mine" },
+      el("h2", null, r.status === "accepted" ? "A fundi is on the way" : "Waiting for a mechanic"),
+      el("div", { class: "meta" }, `${PROB[r.problem] ? PROB[r.problem].label : "Help"} near ${pl ? pl.name : "your location"}${r.landmark ? ", " + r.landmark : ""} · posted ${ago(r.createdAt)}`),
+      r.fee ? el("div", null, feePill(r), r.fee.status === "rejected" ? el("span", { class: "meta" }, " We couldn't find code " + r.fee.code + ". Post a new request with the right code.") : null) : null,
+      r.status === "accepted" && mech ? el("div", null, el("div", { style: "font-weight:700;font-size:18px" }, mech.name + (mech.contact ? " (" + mech.contact + ")" : "")), contactRow(mech.phone, "Hello, this is the driver from Fundi Karibu. Are you on the way?", mech.whatsapp))
+        : r.status === "accepted" ? el("div", { class: "meta" }, "A mechanic accepted. They'll call you on the number you gave.")
+        : el("div", { class: "meta" }, "Mechanics see your request now. Keep your phone on. You can also call someone from the list below."),
+      el("div", { class: "actions" },
+        el("button", { class: "btn small", type: "button", onclick: () => setReqStatus(r, "done") }, "I've been helped"),
+        el("button", { class: "btn small", type: "button", onclick: () => setReqStatus(r, "cancelled") }, "Cancel request"))));
+  }
+
+  // ---------- Post request ----------
+  placeSelect($("rqPlace"), "Choose the nearest town or area");
+  $("rqProblem").replaceChildren(...PROBLEMS.map(([k, l]) => el("option", { value: k }, l)));
+  function openPost() {
+    if (!db) { toast("Requests need this page open in Claude while signed in."); return; }
+    $("rqPlace").value = state.place; $("rqLandmark").value = state.landmark; $("rqProblem").value = state.problem || "other";
+    try { const p = localStorage.getItem("fk-phone"); if (p && !$("rqPhone").value) $("rqPhone").value = p; } catch (_) {}
+    $("rqMsg").replaceChildren();
+    renderFeeCard();
+    setTab("post");
+    window.scrollTo({ top: 0 });
+  }
+  function renderFeeCard() {
+    const box = $("feeCard");
+    if (!feeActive()) {
+      box.replaceChildren(state.canEdit ? el("div", { class: "msg info" }, "No consultation fee is set, so requests are free. ",
+        el("button", { class: "btn small", type: "button", onclick: () => setTab("admin") }, "Set a fee")) : "");
+      $("rqSend").textContent = "Send request";
+      return;
+    }
+    const f = state.fee;
+    const isTill = f.method !== "paybill";
+    const keep = $("rqCode") ? $("rqCode").value : "";
+    box.replaceChildren(el("div", { class: "fee" },
+      el("div", { class: "fee-top" },
+        el("div", null, el("div", { class: "lbl" }, "Consultation fee"), el("div", { style: "font-size:13px;opacity:.85" }, f.covers || "Paid before your request goes to mechanics.")),
+        el("div", { class: "fee-amt" }, el("small", null, "KES"), Number(f.amount).toLocaleString("en-KE"))),
+      el("div", { class: "fee-body" },
+        el("div", { class: "lbl" }, "Pay with M-Pesa"),
+        el("ol", { class: "fee-steps" },
+          el("li", null, "Open M-Pesa and choose ", el("b", null, "Lipa na M-Pesa"), ", then ", el("b", null, isTill ? "Buy Goods and Services" : "Pay Bill"), "."),
+          el("li", null, isTill ? "Till number: " : "Business number: ", el("span", { class: "till" }, f.number, copySmall(f.number))),
+          !isTill && f.account ? el("li", null, "Account number: ", el("span", { class: "till" }, f.account, copySmall(f.account))) : null,
+          el("li", null, "Amount: ", el("b", null, fmtKes(f.amount)), f.name ? ". Check the name shows " : "", f.name ? el("b", null, f.name) : null, "."),
+          el("li", null, "Enter your PIN. Copy the code from the confirmation SMS into the box below.")),
+        el("div", { class: "field" }, el("label", { for: "rqCode" }, "M-Pesa confirmation code"),
+          el("input", { id: "rqCode", class: "code-input", maxlength: "12", autocomplete: "off", placeholder: "e.g. SJK3ABC12X", value: keep })),
+        el("p", { class: "hint" }, "We check every code against our M-Pesa statement. Mechanics see whether your fee is confirmed."))));
+    $("rqSend").textContent = "Send request (" + fmtKes(f.amount) + " paid)";
+  }
+  let feeKey = "";
+  function renderFeeCardIfChanged() {
+    const k = JSON.stringify(state.fee || null) + state.canEdit;
+    if (k !== feeKey) { feeKey = k; renderFeeCard(); }
+  }
+  function copySmall(text) {
+    return el("button", { class: "btn small", type: "button", onclick: async () => {
+      try { await navigator.clipboard.writeText(text); toast("Copied " + text); } catch (_) { toast("Select the number and copy it."); }
+    } }, "Copy");
+  }
+  $("openRequest").onclick = openPost;
+  $("rqCancel").onclick = () => setTab("find");
+  $("rqSend").onclick = async () => {
+    const msg = $("rqMsg");
+    const place = $("rqPlace").value, phone = normPhone($("rqPhone").value);
+    if (!place) return msg.replaceChildren(el("div", { class: "msg err" }, "Choose the town or area you're nearest to."));
+    if (!phone) return msg.replaceChildren(el("div", { class: "msg err" }, "Enter a Kenyan phone number, like 0712 345 678, so the mechanic can call you."));
+    if (!state.me) return msg.replaceChildren(el("div", { class: "msg err" }, "Sign in to Claude to post a request."));
+    let fee = null;
+    if (feeActive()) {
+      const code = normCode($("rqCode") && $("rqCode").value);
+      if (!/^[A-Z0-9]{10}$/.test(code)) return msg.replaceChildren(el("div", { class: "msg err" }, "Enter the 10-character M-Pesa code from your confirmation SMS, like SJK3ABC12X."));
+      if (state.requests.some(r => r.fee && r.fee.code === code)) return msg.replaceChildren(el("div", { class: "msg err" }, "That M-Pesa code was already used for another request. Check the SMS and try again."));
+      fee = { amount: Number(state.fee.amount), code, status: "pending", paidAt: Date.now() };
+    }
+    $("rqSend").disabled = true;
+    try {
+      const doc = { driver: state.me, place, landmark: $("rqLandmark").value.trim().slice(0, 120), problem: $("rqProblem").value,
+        car: $("rqCar").value.trim().slice(0, 60), phone, note: $("rqNote").value.trim().slice(0, 400), status: "open", createdAt: Date.now() };
+      if (fee) doc.fee = fee;
+      await db.collection("requests").add(doc);
+      if ($("rqCode")) $("rqCode").value = "";
+      try { localStorage.setItem("fk-phone", $("rqPhone").value); } catch (_) {}
+      state.place = place; state.landmark = $("rqLandmark").value; $("place").value = place; $("landmark").value = state.landmark; savePrefs();
+      $("rqNote").value = "";
+      toast("Request sent. Mechanics can see it now.");
+      setTab("find");
+    } catch (e) {
+      msg.replaceChildren(el("div", { class: "msg err" }, e && e.code === "invalid_argument" ? "Your access to this page doesn't allow posting requests. Call a mechanic from the list instead." : "Couldn't send the request. Check your connection and try again."));
+    } finally { $("rqSend").disabled = false; }
+  };
+  async function setReqStatus(r, status) {
+    try {
+      const patch = { status };
+      if (status === "done") patch.doneAt = Date.now();
+      await db.doc("requests/" + r.id).update(patch);
+      if (status === "done" && r.acceptedBy && r.acceptedBy === state.me) await setMyStatus("available", true);
+      toast(status === "done" ? "Glad you're sorted. Safe travels." : status === "cancelled" ? "Request cancelled." : "Updated.");
+    } catch (e) { toast("Couldn't update the request. Try again."); }
+  }
+
+  // ---------- Requests (mechanic view) ----------
+  function myListing() { return state.me ? state.mechanics.find(m => m.id === state.me) : null; }
+  function renderRequests() {
+    const out = $("reqList");
+    const mine = myListing();
+    const base = mine && PLACE[mine.place];
+    const recent = state.requests.filter(r => Date.now() - r.createdAt < REQ_MS);
+    const open = recent.filter(r => r.status === "open" && !(r.fee && r.fee.status === "rejected"));
+    const badge = $("reqBadge"); badge.hidden = !open.length; badge.textContent = open.length;
+    if (state.tab !== "req") return;
+    $("reqHint").textContent = base ? `Open requests from the last 24 hours, nearest to ${base.name} first.` : "Open requests from the last 24 hours. List your garage to see distances and take requests.";
+    if (!state.reqLoaded) { out.replaceChildren(el("div", { class: "empty" }, el("p", null, "Loading requests…"))); return; }
+    const takenByMe = recent.filter(r => r.status === "accepted" && mine && r.acceptedBy === mine.id);
+    const list = [...takenByMe, ...open.map(r => ({ r, d: km(base, PLACE[r.place]) })).sort((a, b) => (a.d ?? 1e9) - (b.d ?? 1e9) || b.r.createdAt - a.r.createdAt).map(x => x.r)];
+    if (!list.length) {
+      out.replaceChildren(el("div", { class: "empty" }, el("h3", null, "No one needs help right now"), el("p", null, "New requests from drivers appear here as soon as they're posted.")));
+      return;
+    }
+    out.replaceChildren(...list.map(r => {
+      const pl = PLACE[r.place];
+      const d = km(base, pl);
+      const isMine = r.status === "accepted" && mine && r.acceptedBy === mine.id;
+      const isOwnRequest = r.driver === state.me;
+      return el("article", { class: "req" + (isMine ? " accepted" : "") },
+        el("div", { class: "req-top" },
+          el("div", null, el("h3", null, (PROB[r.problem] ? PROB[r.problem].label : "Help needed") + " · " + (pl ? pl.name : "Unknown place")),
+            el("div", { class: "meta" }, [r.landmark, r.car, ago(r.createdAt)].filter(Boolean).join(" · "))),
+          el("div", { class: "status-row" }, feePill(r), base && d != null ? el("span", { class: "pill none" }, "~" + fmtKm(d) + " km from you") : null)),
+        r.note ? el("div", { class: "note" }, r.note) : null,
+        isMine ? el("div", null, el("div", { class: "meta", style: "margin-bottom:6px" }, "You took this job. Call the driver:"),
+            contactRow(r.phone, `Hello, I'm ${mine.contact || mine.name} from Fundi Karibu. I'm coming to help with your ${PROB[r.problem] ? PROB[r.problem].label.toLowerCase() : "car"}.`, true),
+            el("div", { class: "actions", style: "margin-top:8px" }, el("button", { class: "btn small", type: "button", onclick: () => setReqStatus(r, "done") }, "Mark job done"),
+              el("button", { class: "btn small danger", type: "button", onclick: () => release(r) }, "Can't make it")))
+          : isOwnRequest ? el("span", { class: "hint" }, "This is your own request.")
+          : mine ? el("div", { class: "actions" }, el("button", { class: "btn primary", type: "button", onclick: () => take(r) }, "I'll take this job"))
+          : el("div", { class: "actions" }, el("button", { class: "btn", type: "button", onclick: () => setTab("mech") }, "List your garage to take jobs")));
+    }));
+  }
+  async function take(r) {
+    const mine = myListing(); if (!mine) return;
+    const ref = db.doc("requests/" + r.id);
+    try {
+      const lease = await ref.acquire({ holder: state.me, ttlMs: 8000 });
+      if (!lease.acquired) { toast("Another mechanic is taking this job right now."); return; }
+      const cur = await ref.get();
+      const data = cur.exists ? cur.data() : null;
+      if (!data || data.status !== "open") { toast("Someone already took this job."); return; }
+      await ref.update({ status: "accepted", acceptedBy: mine.id, acceptedAt: Date.now() });
+      await setMyStatus("busy", true);
+      toast("Job is yours, and you're marked busy. Call the driver now.");
+    } catch (e) { toast("Couldn't take the job. Try again."); }
+  }
+  async function release(r) {
+    try { await db.doc("requests/" + r.id).update({ status: "open", acceptedBy: null, acceptedAt: null }); await setMyStatus("available", true); toast("Released. Other mechanics can take it, and you're available again."); }
+    catch (e) { toast("Couldn't update the job."); }
+  }
+
+  // ---------- Mechanic listing ----------
+  placeSelect($("mPlace"), "Choose your town or area");
+  function renderMechChips() {
+    $("mServices").replaceChildren(...SERVICES.map(([k, l]) => el("button", { class: "chip", type: "button", "aria-pressed": String(state.mServices.has(k)),
+      onclick: () => { state.mServices.has(k) ? state.mServices.delete(k) : state.mServices.add(k); renderMechChips(); } }, l)));
+    $("mVehicles").replaceChildren(...VEHICLES.map(([k, l]) => el("button", { class: "chip", type: "button", "aria-pressed": String(state.mVehicles.has(k)),
+      onclick: () => { state.mVehicles.has(k) ? state.mVehicles.delete(k) : state.mVehicles.add(k); renderMechChips(); } }, l)));
+  }
+  let formFilledFor = null;
+  function renderMech() {
+    const mine = myListing();
+    if (mine && formFilledFor !== mine.id) {
+      formFilledFor = mine.id;
+      $("mName").value = mine.name || ""; $("mContact").value = mine.contact || ""; $("mPhone").value = mine.phone ? "0" + mine.phone.slice(3) : "";
+      $("mPlace").value = mine.place || ""; $("mLandmark").value = mine.landmark || ""; $("mHours").value = mine.hours || "24/7"; $("mRange").value = String(mine.range || 0);
+      $("mWa").checked = mine.whatsapp !== false; state.mServices = new Set(mine.services || []); state.mVehicles = new Set(mine.vehicles || []);
+    }
+    renderMechChips();
+    $("mechTitle").textContent = mine ? "Your listing" : "List your garage";
+    $("mSave").textContent = mine ? "Save changes" : "Publish listing";
+    const box = $("availBox");
+    if (!mine) { box.replaceChildren(); $("mDelWrap").replaceChildren(); return; }
+    const cur = statusOf(mine);
+    const since = mine.statusAt || mine.availableAt;
+    const left = since ? Math.max(1, Math.round((AVAIL_MS - (Date.now() - since)) / 3600000)) : 0;
+    box.replaceChildren(el("div", { class: "avail" + (cur === "available" ? " on" : "") },
+      el("div", null, el("strong", null, "Your status"),
+        el("span", { class: "hint" }, cur === "offline" ? "Drivers see you as offline. Pick Available when you can take a job." : `Drivers see you as ${cur === "available" ? "available" : "busy"}. This lasts ${left} more hour${left > 1 ? "s" : ""}, then switches to offline unless you tap again.`)),
+      el("div", { class: "seg3", role: "group", "aria-label": "Your status" }, ["available", "busy", "offline"].map(s =>
+        el("button", { type: "button", class: s, "aria-pressed": String(cur === s), onclick: () => setMyStatus(s) }, el("span", { class: "dot " + s }), s === "available" ? "Available" : s === "busy" ? "Busy" : "Offline")))));
+    const del = el("button", { class: "btn danger", type: "button" }, "Remove listing");
+    del.onclick = () => $("mDelWrap").replaceChildren(el("span", { class: "actions" }, el("span", { class: "hint", style: "align-self:center" }, "Remove your garage from Fundi Karibu?"),
+      el("button", { class: "btn danger", type: "button", onclick: removeListing }, "Yes, remove"), el("button", { class: "btn", type: "button", onclick: () => renderMech() }, "Keep it")));
+    $("mDelWrap").replaceChildren(del);
+  }
+  $("mSave").onclick = async () => {
+    const msg = $("mMsg");
+    const name = $("mName").value.trim(), phone = normPhone($("mPhone").value), place = $("mPlace").value;
+    if (!state.me) return msg.replaceChildren(el("div", { class: "msg err" }, "Sign in to Claude to list a garage."));
+    if (!name) return msg.replaceChildren(el("div", { class: "msg err" }, "Add your business name."));
+    if (!phone) return msg.replaceChildren(el("div", { class: "msg err" }, "Enter a Kenyan phone number, like 0712 345 678."));
+    if (!place) return msg.replaceChildren(el("div", { class: "msg err" }, "Choose the town or area where your garage is."));
+    if (!state.mServices.size) return msg.replaceChildren(el("div", { class: "msg err" }, "Pick at least one service you offer."));
+    const prev = myListing();
+    const doc = { name: name.slice(0, 60), contact: $("mContact").value.trim().slice(0, 40), phone, whatsapp: $("mWa").checked, place, landmark: $("mLandmark").value.trim().slice(0, 120),
+      services: [...state.mServices], vehicles: [...state.mVehicles], hours: $("mHours").value, range: Number($("mRange").value) || 0,
+      available: prev ? !!prev.available : true, availableAt: prev ? (prev.availableAt || null) : Date.now(),
+      status: prev ? (prev.status || statusOf(prev)) : "available", statusAt: prev ? (prev.statusAt || prev.availableAt || null) : Date.now(),
+      createdAt: prev ? prev.createdAt : Date.now(), updatedAt: Date.now() };
+    $("mSave").disabled = true;
+    try {
+      await db.doc("mechanics/" + state.me).set(doc);
+      formFilledFor = state.me;
+      msg.replaceChildren(el("div", { class: "msg ok" }, prev ? "Listing updated." : "You're listed. Drivers nearby can find and call you now."));
+    } catch (e) {
+      msg.replaceChildren(el("div", { class: "msg err" }, e && e.code === "invalid_argument" ? "Your access to this page doesn't allow listing a garage." : "Couldn't save. Check your connection and try again."));
+    } finally { $("mSave").disabled = false; }
+  };
+  async function toggleAvail(on) {
+    try { await db.doc("mechanics/" + state.me).update({ available: on, availableAt: on ? Date.now() : null }); toast(on ? "You're available for 12 hours." : "You're offline."); }
+    catch (e) { toast("Couldn't update. Try again."); }
+  }
+  async function removeListing() {
+    try { await db.doc("mechanics/" + state.me).delete(); formFilledFor = null; ["mName", "mContact", "mPhone", "mLandmark"].forEach(i => $(i).value = ""); state.mServices = new Set(); toast("Your listing was removed."); }
+    catch (e) { toast("Couldn't remove the listing."); }
+  }
+
+  // ---------- Admin: fee settings and payment checks ----------
+  let adminFilled = false;
+  function syncAdminLabels() {
+    const till = $("aMethod").value !== "paybill";
+    $("aNumberLbl").textContent = till ? "Till number" : "Paybill business number";
+    $("aAccountWrap").hidden = till;
+  }
+  $("aMethod").onchange = syncAdminLabels;
+  function renderAdmin() {
+    if (!adminFilled && state.feeLoaded) {
+      adminFilled = true;
+      const f = state.fee || {};
+      $("aOn").checked = !!f.on; $("aAmount").value = f.amount || ""; $("aMethod").value = f.method || "till";
+      $("aNumber").value = f.number || ""; $("aAccount").value = f.account || ""; $("aName").value = f.name || ""; $("aCovers").value = f.covers || "";
+    }
+    syncAdminLabels();
+    const pays = state.requests.filter(r => r.fee).slice(0, 80);
+    const order = { pending: 0, rejected: 1, verified: 2 };
+    pays.sort((a, b) => (order[a.fee.status] ?? 0) - (order[b.fee.status] ?? 0) || b.createdAt - a.createdAt);
+    $("payList").replaceChildren(...(pays.length ? pays.map(r => el("article", { class: "req" + (r.fee.status === "verified" ? " accepted" : r.fee.status === "rejected" ? " done" : "") },
+      el("div", { class: "req-top" },
+        el("div", null, el("h3", { style: "letter-spacing:.06em" }, r.fee.code), el("div", { class: "meta" }, `${fmtKes(r.fee.amount)} · from ${showPhone(r.phone)} · ${PROB[r.problem] ? PROB[r.problem].label : "Help"} near ${PLACE[r.place] ? PLACE[r.place].name : "?"} · ${ago(r.createdAt)}`)),
+        feePill(r)),
+      el("div", { class: "actions" },
+        r.fee.status !== "verified" ? el("button", { class: "btn small primary", type: "button", onclick: () => setFee(r, "verified") }, "Confirm payment") : null,
+        r.fee.status !== "rejected" ? el("button", { class: "btn small danger", type: "button", onclick: () => setFee(r, "rejected") }, "Not on statement") : null,
+        r.fee.status !== "pending" ? el("button", { class: "btn small", type: "button", onclick: () => setFee(r, "pending") }, "Undo") : null)))
+      : [el("div", { class: "empty" }, el("p", null, "Paid requests appear here for you to check against your M-Pesa statement."))]));
+  }
+  async function setFee(r, status) {
+    try { await db.doc("requests/" + r.id).update({ fee: { status, checkedAt: Date.now() } }); toast(status === "verified" ? "Payment confirmed." : status === "rejected" ? "Marked as not found. Mechanics won't see this request." : "Back to pending."); }
+    catch (e) { toast("Couldn't update. Try again."); }
+  }
+  $("aSave").onclick = async () => {
+    const msg = $("aMsg");
+    const amount = Math.round(Number($("aAmount").value));
+    const number = $("aNumber").value.replace(/\D/g, "");
+    const on = $("aOn").checked;
+    if (on && !(amount > 0)) return msg.replaceChildren(el("div", { class: "msg err" }, "Enter the fee in shillings, like 300."));
+    if (on && !/^\d{5,7}$/.test(number)) return msg.replaceChildren(el("div", { class: "msg err" }, "Enter the 5 to 7 digit Till or Paybill number."));
+    if (on && $("aMethod").value === "paybill" && !$("aAccount").value.trim()) return msg.replaceChildren(el("div", { class: "msg err" }, "Add the account number drivers should enter for the Paybill."));
+    try {
+      await db.doc("config/fees").set({ on, amount: amount || 0, method: $("aMethod").value, number, account: $("aAccount").value.trim().slice(0, 20),
+        name: $("aName").value.trim().slice(0, 50), covers: $("aCovers").value.trim().slice(0, 160), updatedAt: Date.now() });
+      msg.replaceChildren(el("div", { class: "msg ok" }, on ? "Saved. Drivers now see the " + fmtKes(amount) + " fee before posting a request." : "Saved. Requests are free."));
+    } catch (e) { msg.replaceChildren(el("div", { class: "msg err" }, "Couldn't save. Only the owner and editors can change the fee.")); }
+  };
+
+  // ---------- Fundi AI chat ----------
+  const chat = { turns: [], busy: false, ctl: null, actions: new Map() };
+  const SUGGESTIONS = ["My car won't start. It clicks when I turn the key.", "The temperature gauge is in the red and there's steam.", "How do I change a flat tyre safely on a highway?", "Brakes feel soft and the pedal goes low."];
+  function rules() {
+    const p = PLACE[state.place];
+    return `You are Fundi AI, the roadside car-trouble assistant inside Fundi Karibu, an app that connects drivers in Kenya with nearby mechanics ("fundis").
+How to answer:
+- Safety first. If the driver is on a road, tell them to switch on hazard lights, place their two warning triangles well behind the car, and wait off the road if traffic is fast. If there is fire, injury, a crash with people hurt, or they feel unsafe, tell them to call 999 or 112 straight away.
+- Ask one or two short questions at a time to narrow the problem down (sounds, warning lights, smells, what happened before).
+- Suggest only simple checks a non-mechanic can do safely at the roadside. Never suggest opening a hot radiator cap, working under a car held only by a jack, or anything risky. Say clearly when a job needs a mechanic.
+- Keep replies short: under 120 words, plain words, short bullet lists with "- ". Use **bold** sparingly. Reply in Swahili if the driver writes in Swahili, Sheng if they use Sheng.
+- Do not quote prices for repairs or parts and do not invent mechanics, phone numbers or places.
+- When the driver needs a mechanic, call find_mechanics to see who is listed nearby and mention the closest by name and distance. Then call prepare_request so the driver gets a button to post a help request. ${feeActive() ? "Posting a request needs a consultation fee of " + fmtKes(state.fee.amount) + " paid with M-Pesa; mention it once when relevant." : ""}
+Driver's chosen location: ${p ? p.name + (state.landmark ? " (" + state.landmark + ")" : "") : "not chosen yet. If they need a mechanic, ask the nearest town or area."}`;
+  }
+  const chatTools = () => [
+    { name: "find_mechanics", description: "Lists up to 5 mechanics listed in Fundi Karibu nearest to the driver's chosen location, with distance in km, whether they are available now, whether they come to the driver, and their services. Returns an empty list if none match.",
+      inputSchema: { type: "object", properties: { service: { type: "string", enum: SERVICES.map(s => s[0]), description: "Service needed, if known" } } },
+      execute(input) {
+        const here = PLACE[state.place];
+        if (!here) return { error: "The driver hasn't chosen their location yet. Ask which town or area they are nearest to." };
+        const svc = SNAME[input && input.service] ? input.service : null;
+        let list = state.mechanics.filter(m => !svc || (m.services || []).includes(svc)).map(m => ({ m, d: km(here, PLACE[m.place]) }));
+        list.sort((a, b) => (a.d ?? 1e9) - (b.d ?? 1e9));
+        return { location: here.name, mechanics: list.slice(0, 5).map(({ m, d }) => ({ name: m.name, km: d == null ? null : Math.round(d), area: PLACE[m.place] ? PLACE[m.place].name : null,
+          status: statusOf(m), comes_to_driver: m.range > 0 && d != null && d <= m.range, services: (m.services || []).map(s => SNAME[s] || s), hours: HOURS[m.hours] || null })) };
+      } },
+    { name: "prepare_request", description: "Shows the driver a button that opens a help request form, pre-filled with the problem and a short note. Use when the driver needs a mechanic to come. Returns 'shown'.",
+      inputSchema: { type: "object", properties: { problem: { type: "string", enum: PROBLEMS.map(p => p[0]) }, note: { type: "string", description: "One or two sentences describing the symptoms for the mechanic" } }, required: ["problem"] },
+      execute(input) {
+        const problem = PROB[input && input.problem] ? input.problem : "other";
+        chat.pendingAction = { problem, note: String((input && input.note) || "").slice(0, 400) };
+        return "shown";
+      } }
+  ];
+  function richText(text) {
+    const frag = []; let list = null;
+    const inline = s => s.split(/(\*\*[^*]+\*\*)/g).filter(Boolean).map(part => /^\*\*[^*]+\*\*$/.test(part) ? el("strong", null, part.slice(2, -2)) : part);
+    for (const raw of String(text).split("\n")) {
+      const line = raw.trim();
+      if (!line) { list = null; continue; }
+      const m = line.match(/^(?:[-*•]|\d+[.)])\s+(.*)$/);
+      if (m) { if (!list) { list = el("ul"); frag.push(list); } list.append(el("li", null, inline(m[1]))); }
+      else { list = null; frag.push(el("p", null, inline(line.replace(/^#+\s*/, "")))); }
+    }
+    return frag;
+  }
+  function renderChat() {
+    const log = $("chatLog");
+    const nodes = [];
+    if (!chat.turns.length) nodes.push(el("div", { class: "bubble ai" }, el("span", { class: "who" }, "Fundi AI"),
+      el("p", null, sample ? "Sasa! Tell me what's happening with your car and where you are. If anyone is hurt or the car is on fire, call 999 or 112 first." : DEMO ? "Fundi AI runs inside Claude, so it's switched off in this demo. Open the app in Claude to chat." : "Fundi AI isn't available in this view. Open the page in Claude while signed in to chat.")));
+    chat.turns.forEach((t, i) => {
+      if (t.role === "user") nodes.push(el("div", { class: "bubble user" }, t.content));
+      else {
+        const act = chat.actions.get(i);
+        nodes.push(el("div", { class: "bubble ai" }, el("span", { class: "who" }, "Fundi AI"), richText(t.content),
+          act ? el("div", { class: "actions" }, el("button", { class: "btn primary small", type: "button", onclick: () => {
+            state.problem = act.problem; openPost(); $("rqProblem").value = act.problem; if (act.note) $("rqNote").value = act.note;
+          } }, "Post a help request"), el("button", { class: "btn small", type: "button", onclick: () => { state.problem = act.problem; setTab("find"); } }, "See mechanics")) : null));
+      }
+    });
+    if (chat.busy) nodes.push(el("div", { class: "bubble ai", id: "liveBubble" }, el("span", { class: "who" }, "Fundi AI"), el("div", { id: "liveText" }, el("span", { class: "dots hint" }))));
+    log.replaceChildren(...nodes);
+    log.scrollTop = log.scrollHeight;
+    $("suggest").replaceChildren(...(!chat.turns.length && sample ? SUGGESTIONS.map(s => el("button", { class: "chip", type: "button", onclick: () => sendChat(s) }, s)) : []));
+    $("chatSend").disabled = chat.busy || !sample; $("chatStop").hidden = !chat.busy; $("chatInput").disabled = !sample;
+  }
+  async function sendChat(text) {
+    text = String(text || "").trim();
+    if (!text || chat.busy || !sample) return;
+    chat.turns.push({ role: "user", content: text.slice(0, 1500) });
+    if (chat.turns.length > 24) chat.turns = chat.turns.slice(-24);
+    while (chat.turns.length && chat.turns[0].role !== "user") chat.turns.shift();
+    chat.busy = true; chat.ctl = new AbortController(); chat.pendingAction = null;
+    $("chatInput").value = "";
+    renderChat();
+    try {
+      const { text: answer } = await sample([{ role: "user", content: rules() }, { role: "assistant", content: "Understood. I'll help the driver safely and briefly." }, ...chat.turns], {
+        signal: chat.ctl.signal, modelTier: "quick", tools: chatTools(),
+        onText: ({ text }) => { const n = $("liveText"); if (n) { n.replaceChildren(...richText(text)); $("chatLog").scrollTop = $("chatLog").scrollHeight; } }
+      });
+      chat.turns.push({ role: "assistant", content: answer || "Sorry, I didn't get that. Could you describe it again?" });
+    } catch (e) {
+      const keep = e && e.text;
+      const why = { not_granted: "Fundi AI needs your OK to use Claude. Allow it when asked, or reload the page to be asked again.",
+        rate_limited: "Too many messages at once. Wait a moment and send again.", cancelled: "Stopped.", refused: "I can't help with that one. Ask me about your car trouble." }[e && e.code]
+        || "Fundi AI couldn't answer just now. Check your connection and try again.";
+      if (e && e.code === "cancelled" && !keep) {
+        const last = chat.turns.pop();
+        $("chatInput").value = last ? last.content : "";
+      } else {
+        chat.turns.push({ role: "assistant", content: (keep ? keep + "\n\n" : "") + why });
+      }
+    } finally {
+      if (chat.pendingAction && chat.turns.length && chat.turns[chat.turns.length - 1].role === "assistant") chat.actions.set(chat.turns.length - 1, chat.pendingAction);
+      chat.busy = false; chat.ctl = null; renderChat();
+    }
+  }
+  $("chatForm").addEventListener("submit", e => { e.preventDefault(); sendChat($("chatInput").value); });
+  $("chatInput").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat($("chatInput").value); } });
+  $("chatInput").addEventListener("input", e => { e.target.style.height = "auto"; e.target.style.height = Math.min(140, e.target.scrollHeight) + "px"; });
+  $("chatStop").onclick = () => chat.ctl && chat.ctl.abort();
+  $("chatClear").onclick = () => { if (chat.busy) chat.ctl && chat.ctl.abort(); chat.turns = []; chat.actions = new Map(); renderChat(); };
+
+  function render() {
+    renderProblemChips();
+    if (state.tab === "find") { renderMyRequest(); renderResults(); }
+    renderRequests();
+    renderBoard();
+    if (state.tab === "mech") renderMech();
+    if (state.tab === "admin") renderAdmin();
+    if (state.tab === "ai" && !chat.busy) renderChat();
+    if (state.tab === "post") renderFeeCardIfChanged();
+    $("tab-admin").hidden = !state.canEdit;
+    const offline = state.dbOk === false || state.canWrite === false;
+    $("openRequest").hidden = offline;
+  }
+  render();
+
+  // ---------- Demo mode (outside Claude, e.g. GitHub Pages) ----------
+  // A small in-browser stand-in for the shared database, saved to this device only.
+  function makeLocalDb() {
+    const KEY = "fk-demo-db";
+    let data = {};
+    try { data = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (_) {}
+    const subs = new Set();
+    const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (_) {} setTimeout(() => subs.forEach(f => f()), 0); };
+    const clone = o => JSON.parse(JSON.stringify(o));
+    const snap = (path) => ({ id: path.split("/").pop(), exists: path in data, data: () => path in data ? clone(data[path]) : undefined, metadata: { fromCache: false, hasPendingWrites: false } });
+    const merge = (a, b) => { for (const [k, v] of Object.entries(b)) { if (v && typeof v === "object" && !Array.isArray(v) && a[k] && typeof a[k] === "object") merge(a[k], v); else a[k] = v; } return a; };
+    const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    function doc(path) {
+      return {
+        id: path.split("/").pop(), path,
+        async get() { return snap(path); },
+        async set(d) { data[path] = clone(d); persist(); },
+        async update(d) { if (!(path in data)) throw { code: "invalid_argument", message: "missing" }; merge(data[path], clone(d)); persist(); },
+        async delete() { delete data[path]; persist(); },
+        async acquire() { return { acquired: true }; },
+        onSnapshot(next) { const f = () => next(snap(path)); subs.add(f); setTimeout(f, 0); return () => subs.delete(f); },
+        collection(sub) { return collection(path + "/" + sub); }
+      };
+    }
+    function collection(path, opts) {
+      opts = opts || {};
+      const depth = path.split("/").length + 1;
+      const run = () => {
+        let keys = Object.keys(data).filter(k => k.startsWith(path + "/") && k.split("/").length === depth);
+        if (opts.order) { const [f, dir] = opts.order; keys.sort((a, b) => ((data[a][f] ?? 0) - (data[b][f] ?? 0)) * (dir === "desc" ? -1 : 1)); }
+        if (opts.limit) keys = keys.slice(0, opts.limit);
+        const docs = keys.map(snap);
+        return { docs, size: docs.length, empty: !docs.length, docChanges: () => [], metadata: { fromCache: false, hasPendingWrites: false } };
+      };
+      return {
+        path,
+        doc(id) { return doc(path + "/" + (id || newId())); },
+        async add(d) { const r = doc(path + "/" + newId()); await r.set(d); return r; },
+        orderBy(f, dir) { return collection(path, { ...opts, order: [f, dir || "asc"] }); },
+        limit(n) { return collection(path, { ...opts, limit: n }); },
+        where() { return collection(path, opts); },
+        async get() { return run(); },
+        onSnapshot(next) { const f = () => next(run()); subs.add(f); setTimeout(f, 0); return () => subs.delete(f); }
+      };
+    }
+    return { doc, collection, isEmpty: () => !Object.keys(data).length, reset: () => { data = {}; try { localStorage.removeItem(KEY); } catch (_) {} } };
+  }
+  async function seedDemo(local) {
+    const now = Date.now(), h = 3600000;
+    const mechs = [
+      ["demo-1", "Kamau Auto Clinic (demo)", "James Kamau", "industrial", "Off Enterprise Rd, near the roundabout", ["engine", "electrical", "battery", "brakes"], ["car", "matatu"], "24/7", 25, "available", now - 1 * h],
+      ["demo-2", "Mombasa Rd Tyre & Towing (demo)", "Ali Hassan", "jkia", "Opposite the Shell, Mombasa Rd", ["tyres", "towing", "battery"], ["car", "truck"], "24/7", 50, "busy", now - 0.5 * h],
+      ["demo-3", "Westlands Mobile Fundi (demo)", "Grace Wanjiru", "westlands", "Comes to you anywhere in Westlands", ["engine", "battery", "overheat", "fuel", "lockout"], ["car"], "day", 10, "available", now - 2 * h],
+      ["demo-4", "Thika Rd Motors (demo)", "Peter Otieno", "roysambu", "Thika Rd service lane, near TRM", ["brakes", "engine", "body", "overheat"], ["car", "matatu", "moto"], "day-mon-sat", 0, "offline", now - 20 * h],
+      ["demo-5", "Naivasha Highway Rescue (demo)", "Samuel Kiprop", "naivasha", "Moi South Lake Rd junction", ["towing", "tyres", "engine", "fuel"], ["car", "truck"], "24/7", 100, "available", now - 3 * h],
+      ["demo-6", "Rongai Brake & Clutch (demo)", "Mary Achieng", "rongai", "Behind Tuskys, Magadi Rd", ["brakes", "electrical"], ["car", "moto"], "day", 0, "busy", now - 1.5 * h]
+    ];
+    mechs.forEach(([id, name, contact, place, landmark, services, vehicles, hours, range, status, at], i) => {
+      local.doc("mechanics/" + id).set({ name, contact, phone: "2547000000" + String(i + 10).slice(-2), whatsapp: true, place, landmark, services, vehicles, hours, range,
+        status, statusAt: at, available: status === "available", availableAt: status === "available" ? at : null, createdAt: now, updatedAt: now });
+    });
+    await local.doc("config/fees").set({ on: true, amount: 200, method: "till", number: "000000", account: "", name: "FUNDI KARIBU DEMO", covers: "The mechanic's call-out and diagnosis. Repairs and parts are agreed with the mechanic.", updatedAt: now });
+    await local.doc("requests/demo-r1").set({ driver: "demo-driver", place: "embakasi", landmark: "Outer Ring Rd, near Taj Mall", problem: "start", car: "Toyota Fielder, silver", phone: "254700000099",
+      note: "Clicking sound when I turn the key. Dashboard lights are dim.", status: "open", createdAt: now - 12 * 60000, fee: { amount: 200, code: "DEMO123ABC", status: "pending", paidAt: now - 12 * 60000 } });
+  }
+  function startDemo() {
+    DEMO = true;
+    const local = makeLocalDb();
+    if (local.isEmpty()) seedDemo(local);
+    db = local; sample = null;
+    state.dbOk = true; state.me = "demo-you"; state.canWrite = true; state.canEdit = true;
+    document.querySelector(".tape").after(el("div", { class: "demo-bar" }, el("div", { class: "wrap" },
+      el("span", null, el("b", null, "Demo mode. "), "Example mechanics, saved only on this device. Calls and WhatsApp are switched off."),
+      el("button", { class: "btn small", type: "button", onclick: () => { local.reset(); location.reload(); } }, "Reset demo"))));
+    subscribe();
+  }
+  // ---------- Platform ----------
+  (async () => {
+    const C = window.claude;
+    if (!C || !C.use) { startDemo(); return; }
+    [db, user, sample] = await Promise.all([C.use("db"), C.use("user"), C.use("sample")]);
+    if (state.tab === "ai") renderChat();
+    if (!db) { state.dbOk = false; render(); return; }
+    state.dbOk = true;
+    if (user) { state.me = await user.id(); state.canWrite = await user.can("data.write"); state.canEdit = await user.canEdit(); }
+    subscribe();
+  })();
+  function subscribe() {
+    db.doc("config/fees").onSnapshot(s => {
+      state.fee = s.exists ? s.data() : null; state.feeLoaded = true; render();
+    }, () => { state.feeLoaded = true; render(); });
+    db.collection("mechanics").onSnapshot(s => {
+      state.mechanics = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(m => m.name && m.place);
+      state.mechLoaded = true; render();
+    }, () => { state.mechLoaded = true; render(); });
+    db.collection("requests").orderBy("createdAt", "desc").limit(300).onSnapshot(s => {
+      state.requests = s.docs.map(d => ({ id: d.id, ...d.data() }));
+      state.reqLoaded = true; render();
+    }, () => { state.reqLoaded = true; render(); });
+  }
+  setInterval(() => { if (document.visibilityState === "visible") render(); }, 60000);
+})();
+</script>
+
+</body>
+</html>
